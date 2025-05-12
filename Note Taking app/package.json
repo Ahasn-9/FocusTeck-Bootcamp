@@ -1,0 +1,14 @@
+{
+  "name": "cli-note-app",
+  "version": "1.0.0",
+  "description": "A simple CLI-based note-taking app using Node.js",
+  "main": "noteApp.js",
+  "bin": {
+    "noteapp": "./noteApp.js"
+  },
+  "scripts": {
+    "start": "node noteApp.js"
+  },
+  "author": "",
+  "license": "MIT"
+} 
