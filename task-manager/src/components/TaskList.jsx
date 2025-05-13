@@ -1,52 +1,54 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const TaskList = () => {
-  const [tasks, setTasks] = useState(["Walk dog", "Write code", "Read docs"]);
-  const [newTask, setNewTask] = useState("");
+  const [tasks, setTasks] = useState([]);
+  const [completed, setCompleted] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  const addTask = () => {
-    if (newTask.trim() === "") return;
-    setTasks([...tasks, newTask]);
-    setNewTask("");
+  useEffect(() => {
+    fetch('https://jsonplaceholder.typicode.com/todos?_limit=7')
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to fetch');
+        return res.json();
+      })
+      .then((data) => {
+        setTasks(data);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError(true);
+        setLoading(false);
+      });
+  }, []);
+
+  const toggleComplete = (id) => {
+    setCompleted((prev) => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
   };
 
-  const removeTask = (index) => {
-    const updatedTasks = tasks.filter((_, i) => i !== index);
-    setTasks(updatedTasks);
-  };
+  if (loading) return <p className="text-center text-gray-600">Loading tasks...</p>;
+  if (error) return <p className="text-center text-red-500">Failed to load tasks.</p>;
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 bg-white shadow-md rounded-lg">
-      <h1 className="text-2xl font-bold text-center mb-4">Task Manager</h1>
-
-      <div className="flex mb-4">
-        <input
-          type="text"
-          className="flex-grow px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none"
-          placeholder="Enter a new task"
-          value={newTask}
-          onChange={(e) => setNewTask(e.target.value)}
-        />
-        <button
-          onClick={addTask}
-          className="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600"
-        >
-          Add
-        </button>
-      </div>
-
-      <ul className="space-y-2">
-        {tasks.map((task, index) => (
+    <div className="max-w-xl mx-auto bg-white p-6 shadow-md rounded-md">
+      <h1 className="text-2xl font-bold mb-4 text-center">Task Manager</h1>
+      <ul className="space-y-3">
+        {tasks.map((task) => (
           <li
-            key={index}
-            className="flex justify-between items-center bg-gray-100 px-4 py-2 rounded"
+            key={task.id}
+            className={`flex justify-between items-center px-4 py-2 rounded-md ${
+              completed[task.id] ? 'bg-green-100 text-green-800 line-through' : 'bg-gray-100'
+            }`}
           >
-            <span>{task}</span>
+            <span>{task.title}</span>
             <button
-              onClick={() => removeTask(index)}
-              className="text-red-500 hover:text-red-700"
+              onClick={() => toggleComplete(task.id)}
+              className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
             >
-              Delete
+              {completed[task.id] ? 'Undo' : 'Complete'}
             </button>
           </li>
         ))}
